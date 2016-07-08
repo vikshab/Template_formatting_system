@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+body {
+  background: #c2e59c; /* fallback for old browsers */
+  background: -webkit-linear-gradient(to left, #c2e59c , #64b3f4); /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(to left, #c2e59c , #64b3f4); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+}
+
+textarea {
+  /*Change height*/
+  resize:vertical;
+  min-height:200px;
+  /*Change width*/
+  resize:horizontal;
+  max-width:700px;
+  min-width:500px;
+}
+
+#header,
+#footer {
+  min-height: 40px;
+}
+
+/* layout */
+#main-wrap {
+  /* overflow to handle inner floating block */
+  overflow: hidden;
+}
+
+#left_block {
+  float: left;
+  width: 50%;
+}
+
+#right_block {
+  float: right;
+  width: 50%;
+}
+</style>
+<head>
+<body>
+
+  <div id="header"><h1>Template formatting system</h1></div>
+  <div id="main-wrap">
+<!----------------------------------------------------------------------------->
+    <!-- LEFT SIDE OF THE PAGE -->
+    <div id="left_block"><h4>Example of template to be formatted</h4>
+
+      <!--example of template to be formatted  -->
+      <pre>
+!name1=John Q.
+!name2=Smith
+!salutation=Dear @name1 @name2
+1 Infinite Loop
+!product=Horcrux Widget
+Somewheresville, CA 98765
+
+
+@salutation,
+
+
+Thank you for your interest in @{product}s.
+Unfortunately, we sold our last @product yesterday.
+
+
+@name1, if you have any more questions about our products,
+email us at support@@horcrux.com, tweet to @@horcrux_support,
+or call us @@ 1-800-HORCRUX.</pre><br>
+
+      <h3>Put you template here</h3><textarea id="inputtext"></textarea></div>
+<!----------------------------------------------------------------------------->
+      <!--RIGHT SIDE OF THE PAGE  -->
+      <div id="right_block"><h4>Example of formatted template</h4>
+
+        <!--example of formatted template  -->
+        <pre>
+1 Infinite Loop
+Somewheresville, CA 98765
+
+
+Dear John Q. Smith,
+
+
+Thank you for your interest in Horcrux Widgets.
+Unfortunately, we sold our last Horcrux Widget yesterday.
+
+
+John Q., if you have any more questions about our products,
+email us at support@horcrux.com, tweet to @horcrux_support,
+or call us @ 1-800-HORCRUX.</pre><br><br><br><br>
+
+        <h3>Get your formatted template</h3><textarea id=outputtext></textarea>
+      </div>
+  </div>
+<!----------------------------------------------------------------------------->
+  <!-- FOOOTER -->
+  <div id="footer"><h4>Click the button to get the result</h4>
+    <button type="button" onclick="formatTemplate()">Format!</button>
+  </div>
+
+  <!-- JAVASCRIPT  -->
+  <script>
+
+    function formatTemplate(){
+      var template = document.getElementById("inputtext").value;
+      var regex_to_find_directives = /!\w*=\w.*|!\w*=@+\w.*/g; //=> !name1=John Q.
+      var directives = template.match(regex_to_find_directives);//=> ["!name1=John Q.", "!name2=Smith",
+      // "!salutation=Dear @name1 @name2", "!product=Horcrux Widget"]
+      var global_variable;
+      var value;
+      var regex;
+
+        for(i=0; i<directives.length; i++){
+          global_variable = (directives[i].match(/(!\w*)=(\w*)/)[1]).replace(/!/, ""); //=> name1
+          value = (directives[i].match(/(!\w*)=(.*)/)[2])
+
+          // Replacing @variable_name
+          regex = new RegExp("@"+ global_variable);
+          template = template.replace(regex, value);
+
+          // Replacing @{variable_name}
+          regex = new RegExp("@{"+ global_variable +"}", "g");
+          template = template.replace(regex, value);
+
+          // Reassigning directives to replace local variables with their values
+          // if any exist
+          directives = template.match(regex_to_find_directives);
+      }
+
+      // Replacing double @ that works as an "excape @" with single @
+      // Removing all !-assignment directives
+      template = template.replace(/@{2}/g, "@");
+      template = template.replace(/(![a-zA-Z0-9]*)=([@a-zA-Z0-9].*\n)/g, "");
+      document.getElementById("outputtext").innerHTML = template;
+    }
+    </script>
+  </body>
+</html>
